@@ -19,14 +19,8 @@ config = {
     ],
     "TablesToRename":
     [
-      {
-        "Table": "Customer",
-        "Columns" :
-          {
-            "oldColumnName":["C1","C2"]",
-            "newColumnName":["C1NEW","C2NEW"]
-          }
-      }
+      {"Table": "Customer","Columns" :{"oldColumnName":["C1","C2"],"newColumnName":["C1NEW","C2NEW"]}}
     ]
-}
+    
+    }
 
