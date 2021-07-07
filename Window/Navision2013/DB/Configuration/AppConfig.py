@@ -16,12 +16,17 @@ config = {
         
         {"Table": "Customer","TableType": "Master","TransactionColumn":"","Key": ["No_"],"CheckOn": "timestamp","Columns":["No_","Name","DBName","EntityName","Chain Name","Country_Region Code","Post Code","Blocked","Service Zone Code","City","State Code","Sector","NBFC","Address","Address2","Salesperson Code","Chain Name"]}
         
-        
     ],
     "TablesToRename":
     [
-        #{"Table": "Customer","Old_Columns" :["No_", "Name", "Address", "Address2", "City", "ChainName", "SalespersonCode", "Country_RegionCode", "Blocked", "PostCode", "ServiceZoneCode", "StateCode", "Sector", "NBFC"],"New_Columns":["Link Customer","Customer Name"," "," ","Customer City","Customer Group Name"," ","Country Region Code", " ", "Customer Post Code" ,"Service Zone Code","Customer State Code"," "," ","DB","Entity","Link Customer Key"]},
-        {"Table": "Customer","Columns" :[{"No_":"Link Customer", "Name":"Customer Name", "City":"Customer City", "ChainName":"Customer Group Name", "Country_RegionCode":"Country Region Code","PostCode":"Customer Post Code","StateCode":"Customer State Code"}]}
+      {
+        "Table": "Customer",
+        "Columns" :
+          {
+            "oldColumnName":["C1","C2"]",
+            "newColumnName":["C1NEW","C2NEW"]
+          }
+      }
     ]
 }
 
