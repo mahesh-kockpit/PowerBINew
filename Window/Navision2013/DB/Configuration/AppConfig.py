@@ -4,8 +4,7 @@ config = {
     
     "DbEntities" : 
     [
-        {"Name" : "Team Computers Pvt Ltd$", "Location" : "DB1E2", "DatabaseName" : "TEAMLIVE","ActiveInactive":"Active","Year":2019,"Month":4},
-        {"Name" : "kockpit", "Location" : "DB1E1", "DatabaseName" : "TEAMLIVE","ActiveInactive":"Active","Year":2019,"Month":4},
+        {"Name" : "Team Computers Pvt Ltd$", "Location" : "DB1E1", "DatabaseName" : "TEAMLIVE","ActiveInactive":"Active","Year":2019,"Month":4}
     ],
     "Dimensions" : 
     [
