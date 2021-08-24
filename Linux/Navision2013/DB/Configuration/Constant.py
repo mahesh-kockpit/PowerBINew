@@ -1,15 +1,8 @@
 from pyspark.sql.types import *
 import datetime
+import psycopg2
 
 
-#SPARK_MASTER = "spark://10.11.5.243:7077"
-WEB_HDFS_API = "http://192.10.15.132:9870/webhdfs/v1"
-SPARK_MASTER = "spark://192.10.15.132:7077"
-HDFS_PATH = "hdfs://master:9000"
-STAGE1_HDFS_RELATIVE_PATH = "/DataMart/Stage1"
-STAGE1_PATH = HDFS_PATH + STAGE1_HDFS_RELATIVE_PATH
-STAGE2_PATH = HDFS_PATH + "/DataMart/Stage2"
-PARQUET_FILE_PATH = "{0}/{1}.parquet"
 MnSt = 4
 yr = 3
 owmode = 'overwrite'
@@ -17,15 +10,22 @@ apmode = 'append'
 #cdate = datetime.datetime.now()
 
 class PostgresDbInfo:
-    Host = "192.10.15.134"
-    Port = "5432"
-    PostgresDB = "kockpit_new"
+    Host = "#Host IP"      
+    Port = "#Port"               
+    PostgresDB = "#DataBaseName"  
     PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB
     Configurl = "jdbc:postgresql://" + Host + "/Configurator_Linux"
     logsDbUrl = "jdbc:postgresql://" + Host + "/Logs_new"
     url = "jdbc:postgresql://192.10.15.134/"
-    props = {"user":"postgres", "password":"admin", "driver": "org.postgresql.Driver"}
-
+    props = {"user":"postgres", "password":"admin", "driver": "org.postgresql.Driver"}   
+    conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "#usernmae", password = "#password", host = PostgresDbInfo.Host)
+class ConfiguratorDbInfo:
+    Host = "{0}"      #Host IP
+    Port = "{1}"               #Port
+    PostgresDB = "Configurator" 
+    Schema = "{2}"              #SchemaName
+    PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB.Schema
+    conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "{3}", password = "{4}", host = PostgresDbInfo.Host)
 class ConnectionInfo:
     JDBC_PARAM = "jdbc"
     SQL_SERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
@@ -77,14 +77,14 @@ class Logger:
         etime = str(end_time-self._startTime)
         self._executionTime = etime.split('.')[0]
     
-    def getSuccessLoggedRecord(self, fileName, dbName, entityName, rowsCount, columnsCount, source):
+    def getSuccessLoggedRecord(self, fileName, DBName, EntityName, rowsCount, columnsCount, source):
         return  [{'Date': self._dateLog,
                     'Start_Time': self._startTimeStr,
                     'End_Time': self._endTimeStr,
                     'Run_Time': self._executionTime,
                     'File_Name': fileName,
-                    'DB': dbName,
-                    'EN': entityName,
+                    'DB': DBName,
+                    'EN': EntityName,
                     'Status': 'Completed',
                     'Log_Status': 'Completed', 
                     'ErrorLineNo.': 'NA', 
@@ -93,14 +93,14 @@ class Logger:
                     'Source': source
                 }]
 
-    def getErrorLoggedRecord(self, fileName, dbName, entityName, exception, errorLineNo, source):
+    def getErrorLoggedRecord(self, fileName, DBName, EntityName, exception, errorLineNo, source):
         return  [{'Date': self._dateLog,
                     'Start_Time': self._startTimeStr,
                     'End_Time': self._endTimeStr,
                     'Run_Time': self._executionTime,
                     'File_Name': fileName,
-                    'DB': dbName,
-                    'EN': entityName,
+                    'DB': DBName,
+                    'EN': EntityName,
                     'Status': 'Failed',
                     'Log_Status': str(exception),
                     'ErrorLineNo.': str(errorLineNo),
@@ -108,3 +108,28 @@ class Logger:
                     'Columns': 0,
                     'Source': source
                 }]
+        
+        
+    # Customer Segmentation connection strings
+    
+engine_string = "postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}".format(
+                user = 'postgres',
+                password = 'sa@123',
+                host = '192.10.15.57',
+                port = '5432',
+                database = 'kockpit_linux',
+                )
+
+config_engine_string = "postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}".format(
+                user = 'postgres',
+                password = 'sa@123',
+                host = '192.10.15.57',
+                port = '5432',
+                database = 'Configurator',
+                )
+
+connection = psycopg2.connect(user="postgres",
+                                  password="sa@123",
+                                  host="192.10.15.57",
+                                  port="5432",
+                                  database="kockpit_linux")
