@@ -10,22 +10,22 @@ apmode = 'append'
 #cdate = datetime.datetime.now()
 
 class PostgresDbInfo:
-    Host = "#Host IP"      
-    Port = "#Port"               
-    PostgresDB = "#DataBaseName"  
+    Host = "#PostgresDbInfo_Host"      
+    Port = "#PostgresDbInfo_Port"               
+    PostgresDB = "#PostgresDbInfo_PostgresDB"  
     PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB
     Configurl = "jdbc:postgresql://" + Host + "/Configurator_Linux"
     logsDbUrl = "jdbc:postgresql://" + Host + "/Logs_new"
     url = "jdbc:postgresql://192.10.15.134/"
     props = {"user":"postgres", "password":"admin", "driver": "org.postgresql.Driver"}   
-    conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "#usernmae", password = "#password", host = PostgresDbInfo.Host)
+    conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "#PostgresDbInfo_User", password = "#PostgresDbInfo_Password", host = PostgresDbInfo.Host)
 class ConfiguratorDbInfo:
-    Host = "{0}"      #Host IP
-    Port = "{1}"               #Port
+    Host = "#ConfiguratorDbInfo_Host"      #Host IP
+    Port = "#ConfiguratorDbInfo_Port"               #Port
     PostgresDB = "Configurator" 
-    Schema = "{2}"              #SchemaName
+    Schema = "#ConfiguratorDbInfo_Schema"              #SchemaName
     PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB.Schema
-    conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "{3}", password = "{4}", host = PostgresDbInfo.Host)
+    conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "#ConfiguratorDbInfo_User", password = "#ConfiguratorDbInfo_Password", host = PostgresDbInfo.Host)
 class ConnectionInfo:
     JDBC_PARAM = "jdbc"
     SQL_SERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
