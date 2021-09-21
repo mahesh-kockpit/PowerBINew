@@ -17,15 +17,16 @@ class PostgresDbInfo:
     Configurl = "jdbc:postgresql://" + Host + "/Configurator_Linux"
     logsDbUrl = "jdbc:postgresql://" + Host + "/Logs_new"
     url = "jdbc:postgresql://192.10.15.134/"
-    props = {"user":"postgres", "password":"admin", "driver": "org.postgresql.Driver"}   
-    conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "#PostgresDbInfo_User", password = "#PostgresDbInfo_Password", host = PostgresDbInfo.Host)
+    props = {"user":"#PostgresDbInfo_User", "password":"#PostgresDbInfo_Password", "driver": "org.postgresql.Driver"}   
+conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "#PostgresDbInfo_User", password = "#PostgresDbInfo_Password", host = PostgresDbInfo.Host)
 class ConfiguratorDbInfo:
     Host = "#ConfiguratorDbInfo_Host"      #Host IP
     Port = "#ConfiguratorDbInfo_Port"               #Port
     PostgresDB = "Configurator" 
     Schema = "#ConfiguratorDbInfo_Schema"              #SchemaName
-    PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB.Schema
-    conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "#ConfiguratorDbInfo_User", password = "#ConfiguratorDbInfo_Password", host = PostgresDbInfo.Host)
+    PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB
+    props = {"user":"#ConfiguratorDbInfo_User", "password":"#ConfiguratorDbInfo_Password", "driver": "org.postgresql.Driver"}   
+conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "#ConfiguratorDbInfo_User", password = "#ConfiguratorDbInfo_Password", host = ConfiguratorDbInfo.Host)
 class ConnectionInfo:
     JDBC_PARAM = "jdbc"
     SQL_SERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
