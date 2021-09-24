@@ -10,23 +10,23 @@ apmode = 'append'
 #cdate = datetime.datetime.now()
 
 class PostgresDbInfo:
-    Host = "#PostgresDbInfo_Host"      
-    Port = "#PostgresDbInfo_Port"               
-    PostgresDB = "#PostgresDbInfo_PostgresDB"  
+    Host = "172.16.10.186"      
+    Port = "5432"               
+    PostgresDB = "kockpit_new"  
     PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB
     Configurl = "jdbc:postgresql://" + Host + "/Configurator_Linux"
     logsDbUrl = "jdbc:postgresql://" + Host + "/Logs_new"
     url = "jdbc:postgresql://192.10.15.134/"
-    props = {"user":"#PostgresDbInfo_User", "password":"#PostgresDbInfo_Password", "driver": "org.postgresql.Driver"}   
-conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "#PostgresDbInfo_User", password = "#PostgresDbInfo_Password", host = PostgresDbInfo.Host)
+    props = {"user":"postgres", "password":"sa@123", "driver": "org.postgresql.Driver"}   
+conn=psycopg2.connect(dbname = PostgresDbInfo.PostgresDB, user = "postgres", password = "sa@123", host = PostgresDbInfo.Host)
 class ConfiguratorDbInfo:
-    Host = "#ConfiguratorDbInfo_Host"      #Host IP
-    Port = "#ConfiguratorDbInfo_Port"               #Port
+    Host = "20.204.142.98"      #Host IP
+    Port = "5432"               #Port
     PostgresDB = "Configurator" 
-    Schema = "#ConfiguratorDbInfo_Schema"              #SchemaName
+    Schema = "kockpitdev"              #SchemaName
     PostgresUrl = "jdbc:postgresql://" + Host + "/" + PostgresDB
-    props = {"user":"#ConfiguratorDbInfo_User", "password":"#ConfiguratorDbInfo_Password", "driver": "org.postgresql.Driver"}   
-conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "#ConfiguratorDbInfo_User", password = "#ConfiguratorDbInfo_Password", host = ConfiguratorDbInfo.Host)
+    props = {"user":"sukriti.saluja@kockpit.in", "password":"$urNX6i5", "driver": "org.postgresql.Driver"}   
+conn=psycopg2.connect(dbname = ConfiguratorDbInfo.PostgresDB, user = "sukriti.saluja@kockpit.in", password = "$urNX6i5", host = ConfiguratorDbInfo.Host)
 class ConnectionInfo:
     JDBC_PARAM = "jdbc"
     SQL_SERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver"

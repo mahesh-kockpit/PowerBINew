@@ -1,87 +1,68 @@
+
+from pyspark.sql import SparkSession,SQLContext
 from pyspark import SparkConf, SparkContext
-from pyspark.sql import SQLContext, SparkSession,Row
-#from pyspark.sql.functions import *
-from pyspark.sql import functions as f
+from pyspark.sql.functions import lit, concat
 from pyspark.sql.types import *
-from pyspark.storagelevel import StorageLevel
-from pyspark.sql.functions import regexp_replace, udf, broadcast,col,max as max_,concat,concat_ws,year,when,month,to_date,lit,quarter,expr,sum,datediff,length,ltrim
-
-import datetime, time
-import datetime as dt
-import re
-
-from pyspark.sql import functions as F
-import pandas as pd
-import os,sys,subprocess
+import pyspark.sql.functions as F
+import os,sys
 from os.path import dirname, join, abspath
+import datetime as dt 
+from builtins import str
+st = dt.datetime.now()
+sys.path.insert(0,'../../../..')
+Kockpit_Path =abspath(join(join(dirname(__file__),'..','..','..','..','..')))
+from Configuration.AppConfig import * 
+from Configuration.Constant import *
+from Configuration.udf import *
+from Configuration import udf as Kockpit
+Filepath = os.path.dirname(os.path.abspath(__file__))
+FilePathSplit = Filepath.split('\\')
+DBName = FilePathSplit[-5]
+EntityName = FilePathSplit[-4]
+DBEntity = DBName+EntityName
 
-helpersDir = '/home/padmin/KockpitStudio'
-sys.path.insert(0, helpersDir)
-from ConfigurationFiles.AppConfig import *
-from Helpers.Constants import *
-from Helpers.udf import *
-
-
-def masters_Location(sqlCtx, spark):
-    st = dt.datetime.now()
-    logger = Logger()
-
-    try:
-        
-        lEntity = next (table for table in config["TablesToIngest"] if table["Table"] == "Location")
-        table_rename = next (table for table in config["TablesToRename"] if table["Table"] == "Location")
-        columns = table_rename["Columns"][0]
-        for entityObj in config["DbEntities"]:
+conf = SparkConf().setMaster("local[*]").setAppName("Location")
+sc = SparkContext(conf = conf)
+sqlCtx = SQLContext(sc)
+spark = sqlCtx.sparkSession
+for dbe in config["DbEntities"]:
+    if dbe['ActiveInactive']=='true' and  dbe['Location']==DBEntity:
+        CompanyName=dbe['Name']
+        CompanyName=CompanyName.replace(" ","")
+        try:
             logger = Logger()
+            columns=Kockpit.TableRename("Location")     
+            finalDF=spark.read.parquet("../../../Stage1/ParquetData/Location" )   
+            finalDF = finalDF.withColumn('Link Location Key',concat(finalDF["DBName"],lit('|'),finalDF["EntityName"],lit('|'),finalDF["Code"]))
+            finalDF = Kockpit.RENAME(finalDF,columns)       
+            result_df = finalDF.select([F.col(col).alias(col.replace(" ","")) for col in finalDF.columns])
+            result_df = result_df.select([F.col(col).alias(col.replace("(","")) for col in result_df.columns])
+            result_df = result_df.select([F.col(col).alias(col.replace(")","")) for col in result_df.columns])
+            result_df.coalesce(1).write.mode("overwrite").parquet("../../../Stage2/ParquetData/Master/Location")
             
-            entityLocation = entityObj["Location"]
-            DBName = entityLocation[:3]
-            EntityName = entityLocation[-2:]
-            hdfspath = STAGE1_PATH + "/" + entityLocation
-            postgresUrl = PostgresDbInfo.url.format(entityLocation)
-            
-            finalDF = ToDFWitoutPrefix(sqlCtx, hdfspath, lEntity, True)
-            finalDF.printSchema()
-            finalDF = RENAME(finalDF,columns)
-            finalDF.printSchema()
-            
-            finalDF = finalDF.withColumn('DB',lit(DBName))\
-                    .withColumn('Entity',lit(EntityName))
-            finalDF = finalDF.withColumn('Link Location Key',concat(finalDF["DB"],lit('|'),finalDF["Entity"],lit('|'),finalDF["Link Location"]))
-            finalDF.printSchema()
-            
-            finalDF.write.jdbc(url=postgresUrl, table="masters.Location", mode='overwrite', properties=PostgresDbInfo.props)#PostgresDbInfo.props
-
             logger.endExecution()
-            
             try:
                 IDEorBatch = sys.argv[1]
             except Exception as e :
                 IDEorBatch = "IDLE"
-
-            log_dict = logger.getSuccessLoggedRecord("masters.Location", entityLocation, entityLocation, finalDF.count(), len(finalDF.columns), IDEorBatch)
-            log_df = spark.createDataFrame(log_dict, logger.getSchema())
-            log_df.write.jdbc(url=PostgresDbInfo.logsDbUrl, table="logtable", mode='append', properties=PostgresDbInfo.props)
-            
-    except Exception as ex:
-        exc_type,exc_value,exc_traceback=sys.exc_info()
-        print("Error:",ex)
-        print("type - "+str(exc_type))
-        print("File - "+exc_traceback.tb_frame.f_code.co_filename)
-        print("Error Line No. - "+str(exc_traceback.tb_lineno))
-
-        logger.endExecution()
-
-        try:
-            IDEorBatch = sys.argv[1]
-        except Exception as e :
-            IDEorBatch = "IDLE"
         
-        log_dict = logger.getErrorLoggedRecord('masters.Location', '', '', ex, exc_traceback.tb_lineno, IDEorBatch)
-        log_df = spark.createDataFrame(log_dict, logger.getSchema())
-        log_df.write.jdbc(url=PostgresDbInfo.logsDbUrl, table="logtable", mode='append', properties=PostgresDbInfo.props)
-    print('masters_Location completed: ' + str((dt.datetime.now()-st).total_seconds()))
-    
-if __name__ == "__main__":
-    sqlCtx, spark = getSparkConfig(SPARK_MASTER, "Stage2:Location")
-    masters_Location(sqlCtx, spark)
+            log_dict = logger.getSuccessLoggedRecord("Location", DBName, EntityName, result_df.count(), len(result_df.columns), IDEorBatch)
+            log_df = spark.createDataFrame(log_dict, logger.getSchema())
+            log_df.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="logs.logs", mode='append', properties=PostgresDbInfo.props)            
+        except Exception as ex:
+            exc_type,exc_value,exc_traceback=sys.exc_info()
+            print("Error:",ex)
+            print("type - "+str(exc_type))
+            print("File - "+exc_traceback.tb_frame.f_code.co_filename)
+            print("Error Line No. - "+str(exc_traceback.tb_lineno))
+            ex = str(ex)
+            logger.endExecution()
+            try:
+                IDEorBatch = sys.argv[1]
+            except Exception as e :
+                IDEorBatch = "IDLE"
+            os.system("spark-submit "+Kockpit_Path+"\Email.py 1 Location '"+CompanyName+"' "+DBEntity+" "+exc_traceback.tb_lineno+"")    
+            log_dict = logger.getErrorLoggedRecord('Location', '', '', str(ex), exc_traceback.tb_lineno, IDEorBatch)
+            log_df = spark.createDataFrame(log_dict, logger.getSchema())
+            log_df.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="logs.logs", mode='append', properties=PostgresDbInfo.props)        
+print('masters_Location completed: ' + str((dt.datetime.now()-st).total_seconds()))

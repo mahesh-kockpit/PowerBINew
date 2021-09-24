@@ -21,7 +21,7 @@ DB0 = DB0[1]
 owmode = 'overwrite'
 apmode = 'append'                           
 st = dt.datetime.now()
-conf = SparkConf().setMaster("local[*]").setAppName("SalesOrder")
+conf = SparkConf().setMaster("local[*]").setAppName("ManualCOGS")
 sc = SparkContext(conf = conf)
 sqlCtx = SQLContext(sc)
 spark = sqlCtx.sparkSession
@@ -46,15 +46,14 @@ for dbe in config["DbEntities"]:
             filter("table_schema = 'sales'").select("table_name")
             table_names_list = [row.table_name for row in table_names.collect()]
             NoofRows = CompanyDetail.count()
-            if 'salesorder' in table_names_list:
+            if 'manualcogs' in table_names_list:
                 cur = conn.cursor()
-                cur.execute('DELETE FROM sales.salesorder WHERE "PostingDate" >=  date_trunc(\'month\', CURRENT_DATE)- INTERVAL \''+str(imonth)+' months\'')  
+                cur.execute('DELETE FROM sales.manualcogs WHERE "PostingDate" >=  date_trunc(\'month\', CURRENT_DATE)- INTERVAL \''+str(imonth)+' months\'')  
                 conn.commit()
                 conn.close()   
                 for i in range(NoofRows):    
                     DBName=(CompanyDetail.collect()[i]['DBName'])
                     EntityName =(CompanyDetail.collect()[i]['EntityName'])
-                    
                     for i in range(imonth+1):    
                         mon = cm-i
                         if mon==0:
@@ -64,33 +63,30 @@ for dbe in config["DbEntities"]:
                             mon = '0'+str(mon)
                         mon = str(mon)    
                         ym = str(cy)+mon
-                        Path = Abs_Path+"/"+DBName+"/"+EntityName+"\Stage2\ParquetData\Sales\SalesOrder\\YearMonth="+ym+""
+                        Path = Abs_Path+"/"+DBName+"/"+EntityName+"\Stage2\ParquetData\Sales\ManualCOGS\\YearMonth="+ym+""
                         if os.path.exists(Path):
                             partitionedDF = spark.read.parquet(Path)
                             partitionedDF =partitionedDF.withColumn('YearMonth',lit(int(ym)))
                             finalDF = partitionedDF.unionByName(finalDF, allowMissingColumns = True)
-        
-                   
-                    finalDF.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="Sales.SalesOrder", mode=apmode, properties=PostgresDbInfo.props)
+                    finalDF.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="Sales.ManualCOGS", mode=apmode, properties=PostgresDbInfo.props)
             else:  
                 for i in range(NoofRows):    
                     DBName=(CompanyDetail.collect()[i]['DBName'])
                     EntityName =(CompanyDetail.collect()[i]['EntityName'])
-                    Path = Abs_Path+"/"+DBName+"/"+EntityName+"\\Stage2\\ParquetData\\Sales\SalesOrder"
+                    Path = Abs_Path+"/"+DBName+"/"+EntityName+"\\Stage2\\ParquetData\\Sales\ManualCOGS"
                     if os.path.exists(Path):
-                        
                         finalDF=spark.read.parquet(Path)
                         if i==0:
-                            finalDF.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="Sales.SalesOrder", mode=owmode, properties=PostgresDbInfo.props)
+                            finalDF.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="Sales.ManualCOGS", mode=owmode, properties=PostgresDbInfo.props)
                         else:
-                            finalDF.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="Sales.SalesOrder", mode=apmode, properties=PostgresDbInfo.props)
+                            finalDF.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="Sales.ManualCOGS", mode=apmode, properties=PostgresDbInfo.props)
             logger.endExecution()
             try:
                 IDEorBatch = sys.argv[1]
             except Exception as e :
                 IDEorBatch = "IDLE"
             
-            log_dict = logger.getSuccessLoggedRecord("Sales.SalesOrder", DB0," ", finalDF.count(), len(finalDF.columns), IDEorBatch)
+            log_dict = logger.getSuccessLoggedRecord("Sales.ManualCOGS", DB0," ", finalDF.count(), len(finalDF.columns), IDEorBatch)
             log_df = spark.createDataFrame(log_dict, logger.getSchema())
             log_df.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="logs.logs", mode='append', properties=PostgresDbInfo.props)
         except Exception as ex:
@@ -106,8 +102,8 @@ for dbe in config["DbEntities"]:
                 IDEorBatch = sys.argv[1]
             except Exception as e :
                 IDEorBatch = "IDLE"
-            os.system("spark-submit "+Kockpit_Path+"\Email.py 1 SalesOrder '"+CompanyName+"' "+DB0+" "+str(exc_traceback.tb_lineno)+"")
-            log_dict = logger.getErrorLoggedRecord('Sales.SalesOrder', DB0 ," " , str(ex), str(exc_traceback.tb_lineno), IDEorBatch)
+            os.system("spark-submit "+Kockpit_Path+"\Email.py 1 ManualCOGS '"+CompanyName+"' "+DB0+" "+str(exc_traceback.tb_lineno)+"")
+            log_dict = logger.getErrorLoggedRecord('Sales.ManualCOGS', DB0 ," " , str(ex), str(exc_traceback.tb_lineno), IDEorBatch)
             log_df = spark.createDataFrame(log_dict, logger.getSchema())
             log_df.write.jdbc(url=PostgresDbInfo.PostgresUrl, table="logs.logs", mode='append', properties=PostgresDbInfo.props)
-print('Sales_SalesOrder: ' + str((dt.datetime.now()-st).total_seconds()))      
+print('Sales_ManualCOGS: ' + str((dt.datetime.now()-st).total_seconds()))      
